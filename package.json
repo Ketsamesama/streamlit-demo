@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "docx": "^8.5.0",
+    "docxtemplater": "^3.47.4",
+    "file-type": "^19.0.0",
+    "fs": "^0.0.1-security",
+    "jszip": "^3.10.1",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.3.136"
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+}

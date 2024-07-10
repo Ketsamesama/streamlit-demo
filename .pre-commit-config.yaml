@@ -1,0 +1,181 @@
+# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022-2024)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Pre-commit configuration file,
+# when Streamlit's pre-commit detects that one of the linters has failed,
+# it automatically lints the files and does not allow the commit to pass.
+# Please review the changes after lint has failed and commit them again,
+# the second commit should pass,
+# because the files were linted after trying to do the first commit.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.4.8
+    hooks:
+      # Run the linter.
+      - id: ruff
+        args: [--fix]
+        files: \.py$|\.pyi$
+      # Run the formatter.
+      - id: ruff-format
+        files: \.py$|\.pyi$
+  - repo: local
+    hooks:
+      # Script ./scripts/run_in_subdirectory.py was used to work around a
+      # known problem with hooks in subdirectories when pass_filenames option
+      # is set to true
+      # See: https://github.com/pre-commit/pre-commit/issues/1417
+      - id: prettier
+        name: Prettier
+        # NOTE: This hook currently does not work on Windows due to "yarn" not being an executable and win32api.CreateProcess
+        # turning `subprocess.run(["yarn", "prettier", "--write"])` into a call to `yarn.exe prettier --write` which does not exist
+        entry: ./scripts/run_in_subdirectory.py frontend/ yarn prettier --write
+        files: ^frontend/.*\.(js|jsx|ts|tsx)$
+        exclude: /vendor/
+        language: node
+        pass_filenames: true
+      - id: prettier-yaml
+        name: Prettier-yaml
+        # NOTE: This hook currently does not work on Windows due to "yarn" not being an executable and win32api.CreateProcess
+        # turning `subprocess.run(["yarn", "prettier", "--write"])` into a call to `yarn.exe prettier --write` which does not exist
+        entry: ./scripts/run_in_subdirectory.py frontend yarn prettier ../.github --write
+        files: ^.github/.*\.(yml|yaml)$
+        language: node
+        pass_filenames: false
+      # Typecheck will be run on CI using --hook-stage manual flag,
+      # check out .github/workflows/js-tests.yml "Run linters" step for details.
+      - id: typecheck-app
+        name: Typecheck App
+        always_run: true
+        entry: yarn --cwd frontend/app tsc --noEmit
+        files: \.(js|jsx|ts|tsx)$
+        language: node
+        pass_filenames: false
+        stages:
+          - manual
+      - id: typecheck-lib
+        name: Typecheck Lib
+        always_run: true
+        # no noEmit flag bc tsconfig.json emitDeclaration key is used
+        entry: yarn --cwd frontend/lib tsc
+        files: \.(js|jsx|ts|tsx)$
+        language: node
+        pass_filenames: false
+        stages:
+          - manual
+      # Eslint will be run on CI using Makefile,
+      # check out .github/workflows/js-tests.yml "Run linters" step for details.
+      - id: eslint
+        name: Eslint
+        always_run: true
+        # TODO: This hook currently does not work on Windows due to "yarn" not being an executable and win32api.CreateProcess
+        # turning `subprocess.run(["yarn", "prettier", "--write"])` into a call to `yarn.exe prettier --write` which does not exist
+        entry: ./scripts/run_in_subdirectory.py frontend/ yarn lint --fix
+        files: ^frontend/src/.*\.(js|jsx|ts|tsx)$
+        language: node
+        pass_filenames: true
+        stages:
+          - manual
+      - id: license-headers
+        name: Checks that all files have the required license headers
+        entry: ./scripts/check_license_headers.py
+        language: system
+        always_run: true
+        pass_filenames: false
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.4
+    hooks:
+      - id: insert-license
+        name: Add license for all (S)CSS/JS(X)/TS(X) files
+        files: \.(s?css|jsx?|tsx?)$
+        args:
+          - --comment-style
+          - "/**| *| */"
+          - --license-filepath
+          - scripts/license-template.txt
+          - --fuzzy-match-generates-todo
+        exclude: |
+          (?x)
+          /vendor/
+          |^vendor/
+          |^component-lib/declarations/apache-arrow
+          |^frontend/app/src/assets/css/variables\.scss
+          |^lib/tests/streamlit/elements/test_html\.js
+      - id: insert-license
+        name: Add license for all Proto files
+        files: \.proto$
+        args:
+          - --comment-style
+          - "/**!| *| */"
+          - --license-filepath
+          - scripts/license-template.txt
+          - --fuzzy-match-generates-todo
+        exclude: |
+          (?x)
+          /vendor/
+          |^vendor/
+          |^component-lib/declarations/apache-arrow
+          |^proto/streamlit/proto/openmetrics_data_model\.proto
+      - id: insert-license
+        name: Add license for all shell files
+        files: \.sh$
+        args:
+          - --comment-style
+          - "|#|"
+          - --license-filepath
+          - scripts/license-template.txt
+          - --fuzzy-match-generates-todo
+        exclude: |
+          (?x)
+          /vendor/
+          |^vendor/
+          |^component-lib/declarations/apache-arrow
+      - id: insert-license
+        name: Add license for all Python files
+        files: \.py$|\.pyi$
+        args:
+          - --comment-style
+          - "|#|"
+          - --license-filepath
+          - scripts/license-template.txt
+          - --fuzzy-match-generates-todo
+        exclude: |
+          (?x)
+          /vendor/
+          |^vendor/
+          |^component-lib/declarations/apache-arrow
+      - id: insert-license
+        name: Add license for all HTML files
+        files: \.html$
+        args:
+          - --comment-style
+          - "<!--||-->"
+          - --license-filepath
+          - scripts/license-template.txt
+          - --fuzzy-match-generates-todo
+        exclude: |
+          (?x)
+          /vendor/
+          |^vendor/
+          |^component-lib/declarations/apache-arrow
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: |
+          (?x)
+          ^frontend/app/src/assets/
+          |^NOTICES$
+          |^proto/streamlit/proto/openmetrics_data_model.proto$
+          |\.snap$
