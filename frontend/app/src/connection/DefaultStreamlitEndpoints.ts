@@ -233,6 +233,7 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
         )
         cleanedText = text.slice(startIndexText).join("\n")
       }
+      console.log(cleanedText)
       return await this.generateDocx(cleanedText)
     } catch (error) {
       throw new Error(`Unsupported file type: ${file.type}`)
