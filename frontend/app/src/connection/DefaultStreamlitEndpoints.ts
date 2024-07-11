@@ -221,19 +221,21 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
       const typeResume = this.checkIsResumeFromMoex(text) ? "moex" : "hh"
       let cleanedText = ""
       if (typeResume === "moex") {
+        text.unshift('hello world')
         const startIndexText = text.findIndex(line =>
           line.startsWith("Позиция")
         )
-        text.unshift('hello world')
-        cleanedText = text.slice(startIndexText).join("\n")
+    
+        cleanedText = text.join("\n")
       } else if (typeResume === "hh") {
+        text.unshift('hello world')
         const startIndexText = text.findIndex(
           line =>
             line === "Желаемая должность и зарплата" ||
             line === "Desired position and salary"
         )
-        text.unshift('hello world')
-        cleanedText = text.slice(startIndexText).join("\n")
+    
+        cleanedText = text.join("\n")
       }
       console.log(cleanedText)
       return await this.generateDocx(cleanedText)
