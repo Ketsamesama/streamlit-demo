@@ -124,8 +124,9 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
     cancelToken?: CancelToken
   ): Promise<void> {
     const cleanedFile = await this.cleanFile(file)
+    console.log(cleanedFile)
     const form = new FormData()
-    form.append(cleanedFile.name, cleanedFile)
+    form.append(file.name, file)
     const headers: Record<string, string> = {}
     if (this.jwtHeader !== undefined) {
       headers[this.jwtHeader.jwtHeaderName] = this.jwtHeader.jwtHeaderValue
