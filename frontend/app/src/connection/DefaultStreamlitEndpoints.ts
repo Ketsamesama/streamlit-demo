@@ -219,25 +219,26 @@ export class DefaultStreamlitEndpoints implements StreamlitEndpoints {
         throw new Error()
       }
       const typeResume = this.checkIsResumeFromMoex(text) ? "moex" : "hh"
+      console.log(typeResume)
       let cleanedText = ""
+
       if (typeResume === "moex") {
-        text.unshift('hello world')
         const startIndexText = text.findIndex(line =>
           line.startsWith("Позиция")
         )
-    
-        cleanedText = text.join("\n")
+
+        cleanedText = text.slice(startIndexText).join("\n")
       } else if (typeResume === "hh") {
-        text.unshift('hello world')
         const startIndexText = text.findIndex(
           line =>
             line === "Желаемая должность и зарплата" ||
             line === "Desired position and salary"
         )
-    
-        cleanedText = text.join("\n")
+        console.log(text)
+        cleanedText = text.slice(startIndexText).join("\n")
       }
       console.log(cleanedText)
+
       return await this.generateDocx(cleanedText)
     } catch (error) {
       throw new Error(`Unsupported file type: ${file.type}`)
